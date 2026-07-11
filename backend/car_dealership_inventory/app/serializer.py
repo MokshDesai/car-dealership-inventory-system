@@ -1,0 +1,9 @@
+from .models import *
+from rest_framework import serializers
+
+class vehiclesSerializer(serializers.ModelSerializer):
+    quantity = serializers.IntegerField(min_value=0)
+
+    class Meta:
+        model = vehicles
+        fields = '__all__'
