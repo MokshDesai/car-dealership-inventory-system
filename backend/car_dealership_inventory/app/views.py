@@ -79,4 +79,12 @@ class vehiclesPurchaseView(APIView):
 
 class vehiclesRestockView(APIView):
    def post(self, request, pk):
-      pass
+        try:
+            vehicle = vehicles.objects.get(pk=pk)
+        except vehicles.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        vehicle.quantity += 1
+        vehicle.save()
+        serializer = vehiclesSerializer(vehicle)
+        return Response(serializer.data, status=status.HTTP_200_OK)
