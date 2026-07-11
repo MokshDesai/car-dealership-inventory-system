@@ -1,9 +1,7 @@
 
 from decimal import Decimal
 
-from django.contrib.auth.models import User
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from .models import vehicles
@@ -23,46 +21,21 @@ def create_vehicle(make, model, category, price, quantity):
 class GetVehiclesListAPITests(APITestCase):
     """
     Tests for: GET /api/vehicles/
-    Goal: return all vehicles in inventory (protected endpoint).
+    Goal: return all vehicles in inventory (public endpoint for now).
     Search filters use the same URL with query params.
     """
 
     url = "/api/vehicles/"
 
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="testuser",
-            password="testpass123",
-        )
-        self.token = Token.objects.create(user=self.user)
-
         self.toyota = create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
         self.honda = create_vehicle("Honda", "Civic", "sedan", "22000.00", 0)
 
-    # ------------------------------------------------------------------
-    # 1. AUTHENTICATION - endpoint must be protected
-    # ------------------------------------------------------------------
-
-    def test_returns_401_when_not_logged_in(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_returns_401_with_invalid_token(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Token this-is-not-valid")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_returns_200_with_valid_token(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+    def test_returns_200_without_authentication(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    # ------------------------------------------------------------------
-    # 2. SUCCESS RESPONSE - shape and content
-    # ------------------------------------------------------------------
-
     def test_returns_json_list(self):
-        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url)
 
         self.assertEqual(response["Content-Type"], "application/json")
@@ -70,21 +43,17 @@ class GetVehiclesListAPITests(APITestCase):
 
     def test_returns_empty_list_when_no_vehicles_exist(self):
         vehicles.objects.all().delete()
-        self.client.force_authenticate(user=self.user)
-
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
     def test_returns_all_vehicles_in_inventory(self):
-        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url)
 
         self.assertEqual(len(response.data), 2)
 
     def test_each_vehicle_has_required_fields(self):
-        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url)
 
         required_fields = {"id", "make", "model", "category", "price", "quantity"}
@@ -92,7 +61,6 @@ class GetVehiclesListAPITests(APITestCase):
             self.assertEqual(set(vehicle_data.keys()), required_fields)
 
     def test_vehicle_values_are_correct(self):
-        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url)
 
         toyota_data = next(item for item in response.data if item["make"] == "Toyota")
@@ -105,7 +73,6 @@ class GetVehiclesListAPITests(APITestCase):
 
     def test_includes_vehicles_with_zero_quantity(self):
         """Out-of-stock vehicles should still appear in the list."""
-        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url)
 
         honda_data = next(item for item in response.data if item["make"] == "Honda")
@@ -121,28 +88,13 @@ class SearchVehiclesAPITests(APITestCase):
     url = "/api/vehicles/"
 
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="searchuser",
-            password="testpass123",
-        )
-        self.client.force_authenticate(user=self.user)
-
         create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
         create_vehicle("Honda", "Civic", "sedan", "22000.00", 3)
         create_vehicle("Ford", "F-150", "truck", "45000.00", 2)
         create_vehicle("Tesla", "Model 3", "electric", "42000.00", 1)
 
     # ------------------------------------------------------------------
-    # 1. AUTHENTICATION
-    # ------------------------------------------------------------------
-
-    def test_search_returns_401_when_not_logged_in(self):
-        self.client.force_authenticate(user=None)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    # ------------------------------------------------------------------
-    # 2. SEARCH BY MAKE
+    # 1. SEARCH BY MAKE
     # ------------------------------------------------------------------
 
     def test_search_by_make_returns_matching_vehicles(self):
@@ -226,3 +178,124 @@ class SearchVehiclesAPITests(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 4)
+
+
+class PostVehiclesAPITests(APITestCase):
+    """
+    Tests for: POST /api/vehicles/
+    Goal: add a new vehicle to inventory.
+    """
+
+    url = "/api/vehicles/"
+
+    def valid_payload(self):
+        return {
+            "make": "BMW",
+            "model": "X5",
+            "category": "suv",
+            "price": "55000.00",
+            "quantity": 3,
+        }
+
+    # ------------------------------------------------------------------
+    # 1. SUCCESS
+    # ------------------------------------------------------------------
+
+    def test_creates_vehicle_with_valid_data(self):
+        response = self.client.post(self.url, self.valid_payload(), format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_returns_created_vehicle_with_all_fields(self):
+        response = self.client.post(self.url, self.valid_payload(), format="json")
+
+        required_fields = {"id", "make", "model", "category", "price", "quantity"}
+        self.assertEqual(set(response.data.keys()), required_fields)
+        self.assertEqual(response.data["make"], "BMW")
+        self.assertEqual(response.data["model"], "X5")
+        self.assertEqual(response.data["category"], "suv")
+        self.assertEqual(Decimal(str(response.data["price"])), Decimal("55000.00"))
+        self.assertEqual(response.data["quantity"], 3)
+
+    def test_saves_vehicle_to_database(self):
+        response = self.client.post(self.url, self.valid_payload(), format="json")
+
+        self.assertTrue(vehicles.objects.filter(id=response.data["id"]).exists())
+        self.assertEqual(vehicles.objects.count(), 1)
+
+    def test_auto_generates_unique_id(self):
+        first = self.client.post(self.url, self.valid_payload(), format="json")
+        second = self.client.post(
+            self.url,
+            {**self.valid_payload(), "make": "Audi", "model": "Q7"},
+            format="json",
+        )
+
+        self.assertNotEqual(first.data["id"], second.data["id"])
+
+    def test_allows_zero_quantity(self):
+        payload = {**self.valid_payload(), "quantity": 0}
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["quantity"], 0)
+
+    # ------------------------------------------------------------------
+    # 2. VALIDATION ERRORS
+    # ------------------------------------------------------------------
+
+    def test_returns_400_when_make_is_missing(self):
+        payload = self.valid_payload()
+        del payload["make"]
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("make", response.data)
+
+    def test_returns_400_when_model_is_missing(self):
+        payload = self.valid_payload()
+        del payload["model"]
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("model", response.data)
+
+    def test_returns_400_when_category_is_missing(self):
+        payload = self.valid_payload()
+        del payload["category"]
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("category", response.data)
+
+    def test_returns_400_when_price_is_missing(self):
+        payload = self.valid_payload()
+        del payload["price"]
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("price", response.data)
+
+    def test_returns_400_when_quantity_is_missing(self):
+        payload = self.valid_payload()
+        del payload["quantity"]
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("quantity", response.data)
+
+    def test_returns_400_when_quantity_is_negative(self):
+        payload = {**self.valid_payload(), "quantity": -1}
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("quantity", response.data)
+
+    def test_returns_400_when_price_is_negative(self):
+        payload = {**self.valid_payload(), "price": "-100.00"}
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("price", response.data)
+
+    def test_returns_400_when_price_is_not_a_number(self):
+        payload = {**self.valid_payload(), "price": "not-a-price"}
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("price", response.data)
+
+    def test_returns_400_when_body_is_empty(self):
+        response = self.client.post(self.url, {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
