@@ -1,10 +1,15 @@
 
 from decimal import Decimal
 
+from django.contrib.auth.models import User
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from .models import vehicles
+
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "admin123"
 
 
 def create_vehicle(make, model, category, price, quantity):
@@ -18,20 +23,128 @@ def create_vehicle(make, model, category, price, quantity):
     )
 
 
+def create_user(username="testuser", password="testpass123", is_staff=False):
+    return User.objects.create_user(
+        username=username,
+        password=password,
+        is_staff=is_staff,
+    )
+
+
+def authenticate_client(client, user):
+    token, _ = Token.objects.get_or_create(user=user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+    return token
+
+
+def get_admin_user():
+    admin, created = User.objects.get_or_create(
+        username=ADMIN_USERNAME,
+        defaults={"is_staff": True},
+    )
+    if created or not admin.has_usable_password():
+        admin.set_password(ADMIN_PASSWORD)
+        admin.is_staff = True
+        admin.save()
+    return admin
+
+
+class AuthAPITests(APITestCase):
+    register_url = "/api/auth/register/"
+    login_url = "/api/auth/login/"
+
+    def test_registers_new_user(self):
+        response = self.client.post(
+            self.register_url,
+            {"username": "newuser", "password": "pass1234", "email": "new@test.com"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn("token", response.data)
+        self.assertEqual(response.data["username"], "newuser")
+        self.assertEqual(response.data["role"], "user")
+
+    def test_registered_user_is_not_admin(self):
+        self.client.post(
+            self.register_url,
+            {"username": "regular", "password": "pass1234"},
+            format="json",
+        )
+        user = User.objects.get(username="regular")
+        self.assertFalse(user.is_staff)
+
+    def test_register_rejects_admin_role(self):
+        response = self.client.post(
+            self.register_url,
+            {"username": "fakeadmin", "password": "pass1234", "role": "admin"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(User.objects.filter(username="fakeadmin").exists())
+
+    def test_register_returns_400_for_duplicate_username(self):
+        create_user(username="taken", password="pass1234")
+        response = self.client.post(
+            self.register_url,
+            {"username": "taken", "password": "otherpass"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_returns_400_when_fields_missing(self):
+        response = self.client.post(self.register_url, {"username": "onlyuser"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_login_with_valid_credentials(self):
+        create_user(username="loginuser", password="pass1234")
+        response = self.client.post(
+            self.login_url,
+            {"username": "loginuser", "password": "pass1234"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("token", response.data)
+
+    def test_login_with_admin_credentials(self):
+        get_admin_user()
+        response = self.client.post(
+            self.login_url,
+            {"username": ADMIN_USERNAME, "password": ADMIN_PASSWORD},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["role"], "admin")
+
+    def test_login_returns_400_for_invalid_credentials(self):
+        response = self.client.post(
+            self.login_url,
+            {"username": "nouser", "password": "wrong"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
 class GetVehiclesListAPITests(APITestCase):
     """
     Tests for: GET /api/vehicles/
-    Goal: return all vehicles in inventory (public endpoint for now).
+    Goal: return all vehicles in inventory (protected endpoint).
     Search filters use the same URL with query params.
     """
 
     url = "/api/vehicles/"
 
     def setUp(self):
+        self.user = create_user()
+        authenticate_client(self.client, self.user)
         self.toyota = create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
         self.honda = create_vehicle("Honda", "Civic", "sedan", "22000.00", 0)
 
-    def test_returns_200_without_authentication(self):
+    def test_returns_401_when_not_authenticated(self):
+        self.client.credentials()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_returns_200_when_authenticated(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -88,6 +201,7 @@ class SearchVehiclesAPITests(APITestCase):
     url = "/api/vehicles/"
 
     def setUp(self):
+        authenticate_client(self.client, create_user(username="searchuser"))
         create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
         create_vehicle("Honda", "Civic", "sedan", "22000.00", 3)
         create_vehicle("Ford", "F-150", "truck", "45000.00", 2)
@@ -187,6 +301,9 @@ class PostVehiclesAPITests(APITestCase):
     """
 
     url = "/api/vehicles/"
+
+    def setUp(self):
+        authenticate_client(self.client, create_user(username="postuser"))
 
     def valid_payload(self):
         return {
@@ -308,6 +425,7 @@ class PutVehiclesAPITests(APITestCase):
     """
 
     def setUp(self):
+        authenticate_client(self.client, create_user(username="putuser"))
         self.vehicle = create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
         self.url = f"/api/vehicles/{self.vehicle.id}/"
 
@@ -450,6 +568,7 @@ class DeleteVehiclesAPITests(APITestCase):
     list_url = "/api/vehicles/"
 
     def setUp(self):
+        authenticate_client(self.client, get_admin_user())
         self.vehicle = create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
         self.url = f"/api/vehicles/{self.vehicle.id}/"
 
@@ -488,6 +607,16 @@ class DeleteVehiclesAPITests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_returns_403_for_non_admin_user(self):
+        authenticate_client(self.client, create_user(username="regularuser"))
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_returns_401_when_not_authenticated(self):
+        self.client.credentials()
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PurchaseVehiclesAPITests(APITestCase):
     """
@@ -496,6 +625,7 @@ class PurchaseVehiclesAPITests(APITestCase):
     """
 
     def setUp(self):
+        authenticate_client(self.client, create_user(username="buyer"))
         self.vehicle = create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
         self.url = f"/api/vehicles/{self.vehicle.id}/purchase/"
 
@@ -575,6 +705,7 @@ class RestockVehiclesAPITests(APITestCase):
     """
 
     def setUp(self):
+        authenticate_client(self.client, get_admin_user())
         self.vehicle = create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
         self.url = f"/api/vehicles/{self.vehicle.id}/restock/"
 
@@ -633,3 +764,13 @@ class RestockVehiclesAPITests(APITestCase):
         url = "/api/vehicles/99999/restock/"
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_returns_403_for_non_admin_user(self):
+        authenticate_client(self.client, create_user(username="regularuser"))
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_returns_401_when_not_authenticated(self):
+        self.client.credentials()
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
