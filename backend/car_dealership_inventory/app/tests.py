@@ -299,3 +299,143 @@ class PostVehiclesAPITests(APITestCase):
     def test_returns_400_when_body_is_empty(self):
         response = self.client.post(self.url, {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class PutVehiclesAPITests(APITestCase):
+    """
+    Tests for: PUT /api/vehicles/:id/
+    Goal: update a vehicle's details.
+    """
+
+    def setUp(self):
+        self.vehicle = create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
+        self.url = f"/api/vehicles/{self.vehicle.id}/"
+
+    def valid_payload(self):
+        return {
+            "make": "Toyota",
+            "model": "Camry Hybrid",
+            "category": "hybrid",
+            "price": "28000.00",
+            "quantity": 8,
+        }
+
+    # ------------------------------------------------------------------
+    # 1. SUCCESS
+    # ------------------------------------------------------------------
+
+    def test_updates_vehicle_with_valid_data(self):
+        response = self.client.put(self.url, self.valid_payload(), format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_returns_updated_vehicle_with_all_fields(self):
+        response = self.client.put(self.url, self.valid_payload(), format="json")
+
+        required_fields = {"id", "make", "model", "category", "price", "quantity"}
+        self.assertEqual(set(response.data.keys()), required_fields)
+        self.assertEqual(response.data["id"], self.vehicle.id)
+        self.assertEqual(response.data["model"], "Camry Hybrid")
+        self.assertEqual(response.data["category"], "hybrid")
+        self.assertEqual(Decimal(str(response.data["price"])), Decimal("28000.00"))
+        self.assertEqual(response.data["quantity"], 8)
+
+    def test_persists_changes_to_database(self):
+        self.client.put(self.url, self.valid_payload(), format="json")
+
+        self.vehicle.refresh_from_db()
+        self.assertEqual(self.vehicle.model, "Camry Hybrid")
+        self.assertEqual(self.vehicle.category, "hybrid")
+        self.assertEqual(self.vehicle.price, Decimal("28000.00"))
+        self.assertEqual(self.vehicle.quantity, 8)
+
+    def test_does_not_change_vehicle_id(self):
+        original_id = self.vehicle.id
+        self.client.put(self.url, self.valid_payload(), format="json")
+
+        self.vehicle.refresh_from_db()
+        self.assertEqual(self.vehicle.id, original_id)
+
+    def test_does_not_affect_other_vehicles(self):
+        other = create_vehicle("Honda", "Civic", "sedan", "22000.00", 3)
+        self.client.put(self.url, self.valid_payload(), format="json")
+
+        other.refresh_from_db()
+        self.assertEqual(other.model, "Civic")
+        self.assertEqual(other.quantity, 3)
+
+    def test_allows_zero_quantity(self):
+        payload = {**self.valid_payload(), "quantity": 0}
+        response = self.client.put(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["quantity"], 0)
+
+    # ------------------------------------------------------------------
+    # 2. NOT FOUND
+    # ------------------------------------------------------------------
+
+    def test_returns_404_when_vehicle_does_not_exist(self):
+        url = f"/api/vehicles/99999/"
+        response = self.client.put(url, self.valid_payload(), format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    # ------------------------------------------------------------------
+    # 3. VALIDATION ERRORS
+    # ------------------------------------------------------------------
+
+    def test_returns_400_when_make_is_missing(self):
+        payload = self.valid_payload()
+        del payload["make"]
+        response = self.client.put(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("make", response.data)
+
+    def test_returns_400_when_model_is_missing(self):
+        payload = self.valid_payload()
+        del payload["model"]
+        response = self.client.put(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("model", response.data)
+
+    def test_returns_400_when_category_is_missing(self):
+        payload = self.valid_payload()
+        del payload["category"]
+        response = self.client.put(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("category", response.data)
+
+    def test_returns_400_when_price_is_missing(self):
+        payload = self.valid_payload()
+        del payload["price"]
+        response = self.client.put(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("price", response.data)
+
+    def test_returns_400_when_quantity_is_missing(self):
+        payload = self.valid_payload()
+        del payload["quantity"]
+        response = self.client.put(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("quantity", response.data)
+
+    def test_returns_400_when_quantity_is_negative(self):
+        payload = {**self.valid_payload(), "quantity": -1}
+        response = self.client.put(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("quantity", response.data)
+
+    def test_returns_400_when_price_is_negative(self):
+        payload = {**self.valid_payload(), "price": "-100.00"}
+        response = self.client.put(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("price", response.data)
+
+    def test_returns_400_when_price_is_not_a_number(self):
+        payload = {**self.valid_payload(), "price": "not-a-price"}
+        response = self.client.put(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("price", response.data)
+
+    def test_returns_400_when_body_is_empty(self):
+        response = self.client.put(self.url, {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

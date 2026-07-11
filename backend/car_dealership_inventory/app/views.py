@@ -36,4 +36,9 @@ class vehiclesListView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
- 
+
+
+class vehiclesDetailView(APIView):
+   
+    def put(self, request, pk):
+        pass

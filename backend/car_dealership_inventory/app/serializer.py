@@ -10,3 +10,4 @@ class vehiclesSerializer(serializers.ModelSerializer):
     class Meta:
         model = vehicles
         fields = '__all__'
+        read_only_fields = ['id']
