@@ -440,3 +440,50 @@ class PutVehiclesAPITests(APITestCase):
         response = self.client.put(self.url, {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+
+class DeleteVehiclesAPITests(APITestCase):
+    """
+    Tests for: DELETE /api/vehicles/:id/
+    Goal: delete a vehicle from inventory.
+    """
+
+    list_url = "/api/vehicles/"
+
+    def setUp(self):
+        self.vehicle = create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
+        self.url = f"/api/vehicles/{self.vehicle.id}/"
+
+    # ------------------------------------------------------------------
+    # 1. SUCCESS
+    # ------------------------------------------------------------------
+
+    def test_deletes_vehicle_successfully(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_removes_vehicle_from_database(self):
+        self.client.delete(self.url)
+        self.assertFalse(vehicles.objects.filter(id=self.vehicle.id).exists())
+
+    def test_does_not_affect_other_vehicles(self):
+        other = create_vehicle("Honda", "Civic", "sedan", "22000.00", 3)
+        self.client.delete(self.url)
+
+        self.assertFalse(vehicles.objects.filter(id=self.vehicle.id).exists())
+        self.assertTrue(vehicles.objects.filter(id=other.id).exists())
+
+    def test_deleted_vehicle_not_in_list(self):
+        self.client.delete(self.url)
+        response = self.client.get(self.list_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])
+
+    # ------------------------------------------------------------------
+    # 2. NOT FOUND
+    # ------------------------------------------------------------------
+
+    def test_returns_404_when_vehicle_does_not_exist(self):
+        url = "/api/vehicles/99999/"
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
