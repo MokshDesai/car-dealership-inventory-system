@@ -6,7 +6,7 @@ from .models import vehicles
 from .serializer import vehiclesSerializer
 
 
-class vehiclesListView(APIView):
+class vehiclesManagementView(APIView):
     def get(self, request):
         queryset = vehicles.objects.all()
 
@@ -37,9 +37,6 @@ class vehiclesListView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class vehiclesDetailView(APIView):
-   
     def put(self, request, pk):
         try:
             vehicle = vehicles.objects.get(pk=pk)
@@ -51,3 +48,6 @@ class vehiclesDetailView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+   
+       

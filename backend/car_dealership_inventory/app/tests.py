@@ -439,3 +439,4 @@ class PutVehiclesAPITests(APITestCase):
     def test_returns_400_when_body_is_empty(self):
         response = self.client.put(self.url, {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
