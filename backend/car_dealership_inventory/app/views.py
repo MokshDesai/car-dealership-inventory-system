@@ -57,4 +57,9 @@ class vehiclesManagementView(APIView):
 
         vehicle.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-      
+
+
+class vehiclesPurchaseView(APIView):
+    def post(self, request, pk):
+        pass
+       
