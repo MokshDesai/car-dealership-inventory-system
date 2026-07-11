@@ -50,5 +50,11 @@ class vehiclesManagementView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        pass
+        try:
+            vehicle = vehicles.objects.get(pk=pk)
+        except vehicles.DoesNotExist:
+            return Response({"error": "Vehicle not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        vehicle.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
       
