@@ -1,5 +1,7 @@
-from .models import *
 from rest_framework import serializers
+
+from .models import vehicles
+
 
 class vehiclesSerializer(serializers.ModelSerializer):
     quantity = serializers.IntegerField(min_value=0)

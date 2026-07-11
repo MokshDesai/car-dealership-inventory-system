@@ -22,8 +22,9 @@ def create_vehicle(make, model, category, price, quantity):
 
 class GetVehiclesListAPITests(APITestCase):
     """
-    Tests for: GET /api/vehicles
+    Tests for: GET /api/vehicles/
     Goal: return all vehicles in inventory (protected endpoint).
+    Search filters use the same URL with query params.
     """
 
     url = "/api/vehicles/"
@@ -113,11 +114,11 @@ class GetVehiclesListAPITests(APITestCase):
 
 class SearchVehiclesAPITests(APITestCase):
     """
-    Tests for: GET /api/vehicles/search
+    Tests for: GET /api/vehicles?make=...&model=...
     Goal: filter vehicles by make, model, category, or price range.
     """
 
-    url = "/api/vehicles/search/"
+    url = "/api/vehicles/"
 
     def setUp(self):
         self.user = User.objects.create_user(

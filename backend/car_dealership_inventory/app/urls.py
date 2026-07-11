@@ -1,8 +1,7 @@
 from django.urls import path
 
-from .views import vehiclesListView, vehiclesSearchView
+from .views import vehiclesListView
 
 urlpatterns = [
-    path("vehicles/search/", vehiclesSearchView.as_view()),
     path("vehicles/", vehiclesListView.as_view()),
 ]
