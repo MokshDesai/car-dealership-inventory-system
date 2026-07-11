@@ -69,9 +69,14 @@ class vehiclesPurchaseView(APIView):
 
         if vehicle.quantity <= 0:
             return Response({"error": "Out of stock"}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         vehicle.quantity -= 1
         vehicle.save()
 
         serializer = vehiclesSerializer(vehicle)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class vehiclesRestockView(APIView):
+   def post(self, request, pk):
+      pass

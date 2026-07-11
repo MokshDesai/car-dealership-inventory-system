@@ -566,3 +566,70 @@ class PurchaseVehiclesAPITests(APITestCase):
         url = "/api/vehicles/99999/purchase/"
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class RestockVehiclesAPITests(APITestCase):
+    """
+    Tests for: POST /api/vehicles/:id/restock/
+    Goal: restock a vehicle and increase its quantity by 1.
+    """
+
+    def setUp(self):
+        self.vehicle = create_vehicle("Toyota", "Camry", "sedan", "25000.00", 5)
+        self.url = f"/api/vehicles/{self.vehicle.id}/restock/"
+
+    # ------------------------------------------------------------------
+    # 1. SUCCESS
+    # ------------------------------------------------------------------
+
+    def test_restocks_vehicle_successfully(self):
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_increases_quantity_by_one(self):
+        response = self.client.post(self.url)
+        self.assertEqual(response.data["quantity"], 6)
+
+    def test_persists_quantity_change_to_database(self):
+        self.client.post(self.url)
+        self.vehicle.refresh_from_db()
+        self.assertEqual(self.vehicle.quantity, 6)
+
+    def test_returns_updated_vehicle_with_all_fields(self):
+        response = self.client.post(self.url)
+
+        required_fields = {"id", "make", "model", "category", "price", "quantity"}
+        self.assertEqual(set(response.data.keys()), required_fields)
+        self.assertEqual(response.data["id"], self.vehicle.id)
+        self.assertEqual(response.data["make"], "Toyota")
+
+    def test_multiple_restocks_increase_quantity_each_time(self):
+        self.client.post(self.url)
+        self.client.post(self.url)
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.data["quantity"], 8)
+
+    def test_works_when_quantity_is_zero(self):
+        self.vehicle.quantity = 0
+        self.vehicle.save()
+
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["quantity"], 1)
+
+    def test_does_not_affect_other_vehicles(self):
+        other = create_vehicle("Honda", "Civic", "sedan", "22000.00", 3)
+        self.client.post(self.url)
+
+        other.refresh_from_db()
+        self.assertEqual(other.quantity, 3)
+
+    # ------------------------------------------------------------------
+    # 2. NOT FOUND
+    # ------------------------------------------------------------------
+
+    def test_returns_404_when_vehicle_does_not_exist(self):
+        url = "/api/vehicles/99999/restock/"
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
