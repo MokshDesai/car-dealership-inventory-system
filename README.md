@@ -38,6 +38,29 @@ A high-fidelity, production-ready **Car Dealership Inventory System** built usin
 
 ---
 
+## 🖼️ Application Screenshots
+
+### 🔑 Authentication View
+![Login & Registration Screen](docs/screenshots/login_screen.png)
+*Figure 1: Minimalist split-screen Login page showing transparent form inputs on the left and dynamic brand suite tags on the right.*
+
+---
+
+### 👑 Administrator Console
+![Administrator Dashboard Grid](docs/screenshots/admin_dashboard.png)
+*Figure 2: Full-screen 3-column Admin dashboard layout showing active listing grids (Creta & Verna) using Indian Rupee (₹) currency formatting, alongside the operational forms on the sidebars.*
+
+---
+
+### 💬 Action Validation Pop-ups
+![Login Authorization Confirmation](docs/screenshots/login_success_modal.png)
+*Figure 3: Pop-up overlay modal confirmation dialog displaying a successful login validation check.*
+
+![Add Inventory Confirmation](docs/screenshots/add_success_modal.png)
+*Figure 4: Dynamic pop-up modal showing successful inventory record insertion.*
+
+---
+
 ## 🛠️ Technology Stack
 
 - **Frontend**:

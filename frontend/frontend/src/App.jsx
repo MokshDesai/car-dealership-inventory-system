@@ -419,11 +419,11 @@ function App() {
                 <input id="search-category" name="category" placeholder="e.g. Sedan" value={filters.category} onChange={handleFilterChange} />
               </div>
               <div className="form-group">
-                <label htmlFor="search-min-price">Min Price ($)</label>
+                <label htmlFor="search-min-price">Min Price (₹)</label>
                 <input id="search-min-price" name="min_price" placeholder="Min" value={filters.min_price} onChange={handleFilterChange} />
               </div>
               <div className="form-group">
-                <label htmlFor="search-max-price">Max Price ($)</label>
+                <label htmlFor="search-max-price">Max Price (₹)</label>
                 <input id="search-max-price" name="max_price" placeholder="Max" value={filters.max_price} onChange={handleFilterChange} />
               </div>
               <button type="submit" className="search-btn">Filter Fleet</button>
@@ -466,7 +466,7 @@ function App() {
                     <div className="card-body">
                       <p className="price-row">
                         <strong>Valuation Price</strong>
-                        <span className="price-tag">${Number(vehicle.price).toLocaleString()}</span>
+                        <span className="price-tag">₹{Number(vehicle.price).toLocaleString()}</span>
                       </p>
                       <p className="stock-row">
                         <strong>Availability Status</strong>
@@ -542,7 +542,7 @@ function App() {
                     <input id="form-category" name="category" placeholder="e.g. Hatchback" value={vehicleForm.category} onChange={handleVehicleFormChange} required />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="form-price">Price ($)</label>
+                    <label htmlFor="form-price">Price (₹)</label>
                     <input id="form-price" name="price" placeholder="e.g. 25000" value={vehicleForm.price} onChange={handleVehicleFormChange} required />
                   </div>
                   <div className="form-group">
@@ -570,7 +570,7 @@ function App() {
               <section className="card info-card admin-guide-card">
                 <h3>📋 Listing Guidelines</h3>
                 <ul className="guide-list">
-                  <li>Ensure prices are entered as positive integers in USD.</li>
+                  <li>Ensure prices are entered as positive integers in INR.</li>
                   <li>Categorize correctly (Sedan, SUV, Hatchback) to maintain index integrity.</li>
                   <li>Valuations recalculate dynamically across active models in real-time.</li>
                 </ul>

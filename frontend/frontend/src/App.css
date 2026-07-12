@@ -705,9 +705,9 @@ button.danger:hover {
 /* Vehicle Cards */
 .vehicle-card {
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   background: var(--bg-card);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 20px -2px rgba(255, 114, 83, 0.03), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -718,12 +718,12 @@ button.danger:hover {
 
 .vehicle-card:hover {
   transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 12px 30px -4px rgba(255, 114, 83, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
   border-color: rgba(255, 114, 83, 0.3);
 }
 
 .vehicle-card .card-header {
-  padding: 24px;
+  padding: 24px 24px 16px 24px;
   border-bottom: 1px solid var(--border-color);
   background: linear-gradient(180deg, #fffcf9 0%, #ffffff 100%);
   display: flex;
@@ -754,7 +754,7 @@ button.danger:hover {
 }
 
 .vehicle-card .card-body {
-  padding: 12px 0;
+  padding: 20px 24px;
   flex-grow: 1;
 }
 
@@ -801,9 +801,9 @@ button.danger:hover {
 }
 
 .vehicle-card .actions {
-  padding: 16px 0 0 0;
-  background: transparent;
-  border-top: none;
+  padding: 20px 24px 24px 24px;
+  background: #fffdfb;
+  border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 12px;
