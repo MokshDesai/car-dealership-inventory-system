@@ -2,9 +2,14 @@
 
 A high-fidelity, production-ready **Car Dealership Inventory System** built using **Django REST Framework (DRF)** on the backend and **React (Vite)** on the frontend. The application features a custom, modern minimalist layout, role-based operations, real-time client-side pagination, search/filtering, and custom alert pop-up modals for action confirmations.
 
-### 🌐 Live Demo
+### 🌐 Live Demo & Testing
 - **Frontend (Vite/React on Vercel)**: [https://frontend-nine-self-39.vercel.app](https://frontend-nine-self-39.vercel.app)
-- **Backend API (Django on Render)**: [https://car-dealership-backend-pu3n.onrender.com/api/](https://car-dealership-backend-pu3n.onrender.com/api/vehicles/) *(Returns 401 Unauthorized unless logged in)*
+- **Backend API (Django on Render)**: [https://car-dealership-backend-pu3n.onrender.com/api/vehicles/](https://car-dealership-backend-pu3n.onrender.com/api/vehicles/) *(Returns 401 Unauthorized unless logged in)*
+
+#### 🔑 Administrator Login (For Testing)
+To test the administrator features, log in on the Vercel site using these seeded credentials:
+- **Username**: `admin`
+- **Password**: `admin123`
 
 ---
 
