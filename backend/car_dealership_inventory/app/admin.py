@@ -1,6 +1,6 @@
 from django.contrib import admin
+from .models import vehicles
 
-from .models import *
-
-# Register your models here.
-admin.site.register(vehicles)
+@admin.register(vehicles)
+class VehiclesAdmin(admin.ModelAdmin):
+    list_display = ('make', 'model', 'category', 'price', 'quantity')
