@@ -67,7 +67,7 @@ class AuthAPITests(APITestCase):
     def test_registered_user_is_not_admin(self):
         self.client.post(
             self.register_url,
-            {"username": "regular", "password": "pass1234"},
+            {"username": "regular", "email": "regular@test.com", "password": "pass1234"},
             format="json",
         )
         user = User.objects.get(username="regular")
@@ -76,7 +76,7 @@ class AuthAPITests(APITestCase):
     def test_register_rejects_admin_role(self):
         response = self.client.post(
             self.register_url,
-            {"username": "fakeadmin", "password": "pass1234", "role": "admin"},
+            {"username": "fakeadmin", "email": "fakeadmin@test.com", "password": "pass1234", "role": "admin"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -86,7 +86,7 @@ class AuthAPITests(APITestCase):
         create_user(username="taken", password="pass1234")
         response = self.client.post(
             self.register_url,
-            {"username": "taken", "password": "otherpass"},
+            {"username": "taken", "email": "other@test.com", "password": "otherpass"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

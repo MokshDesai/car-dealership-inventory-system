@@ -58,10 +58,10 @@ async function apiCall(url, options = {}) {
   return data
 }
 
-export function register(username, password) {
+export function register(username, email, password) {
   return apiCall('/auth/register/', {
     method: 'POST',
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, email, password }),
   })
 }
 

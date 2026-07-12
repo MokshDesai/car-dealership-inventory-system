@@ -35,7 +35,7 @@ function App() {
     min_price: '',
     max_price: '',
   })
-  const [form, setForm] = useState({ username: '', password: '' })
+  const [form, setForm] = useState({ username: '', email: '', password: '' })
   const [vehicleForm, setVehicleForm] = useState(emptyVehicle)
   const [editId, setEditId] = useState(null)
   const [message, setMessage] = useState('')
@@ -81,7 +81,7 @@ function App() {
   async function handleRegister(event) {
     event.preventDefault()
     try {
-      const data = await register(form.username, form.password)
+      const data = await register(form.username, form.email, form.password)
       saveUser(data)
       setUser({ token: data.token, username: data.username, role: data.role })
       setPage('home')
@@ -282,6 +282,19 @@ function App() {
                       name="username"
                       placeholder="Choose a username"
                       value={form.username}
+                      onChange={handleAuthChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label htmlFor="reg-email">Email Address</label>
+                    <input
+                      id="reg-email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter your email address"
+                      value={form.email || ''}
                       onChange={handleAuthChange}
                       required
                     />

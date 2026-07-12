@@ -17,6 +17,7 @@ from .serializer import vehiclesSerializer
 @permission_classes([AllowAny])
 def auth_register(request):
     username = request.data.get('username')
+    email = request.data.get('email')
     password = request.data.get('password')
     role = request.data.get('role', 'user')
 
@@ -29,13 +30,20 @@ def auth_register(request):
     if role != 'user':
         return Response({'error': 'Role must be user.'}, status=status.HTTP_400_BAD_REQUEST)
     
-    if not username or not password:
-        return Response({'error': 'Username and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    if not username or not email or not password:
+        return Response({'error': 'Username, email, and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Basic verification
+    if '@' not in email or '.' not in email:
+        return Response({'error': 'Please enter a valid email address.'}, status=status.HTTP_400_BAD_REQUEST)
 
     if User.objects.filter(username=username).exists():
         return Response({'error': 'Username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    user = User.objects.create_user(username=username, password=password)
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Email already registered.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = User.objects.create_user(username=username, email=email, password=password)
     token, _ = Token.objects.get_or_create(user=user)
     return Response(
         {
