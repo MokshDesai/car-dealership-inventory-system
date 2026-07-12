@@ -59,8 +59,9 @@ A high-fidelity, production-ready **Car Dealership Inventory System** built usin
 ![Customer Dashboard Grid](<docs/screenshots/User/Screenshot 2026-07-12 at 4.33.51 PM.png>)
 *Figure 5: User Dashboard View. Hides admin privileges, showing only customer-focused catalog buttons and the listing acquisition policy rules.*
 
- [!NOTE]
- Additional screenshots illustrating more system features and workflows are available in the [docs](file:///Users/mokshdesai/Desktop/interview/final/car-dealership-inventory-system/docs) folder.
+> [!NOTE]
+> Additional screenshots illustrating more system features and workflows are available in the [docs](file:///Users/mokshdesai/Desktop/interview/final/car-dealership-inventory-system/docs) folder.
+
 ---
 
 ## 🛠️ Technology Stack
@@ -194,3 +195,21 @@ Make sure you have the following installed on your machine:
 | **POST** | `/api/vehicles/<id>/restock/` | Add units to quantity stock count | Yes (Admin) |
 
 ---
+## 🤖 My AI Usage
+
+To work faster and write clean code, I used different AI tools as my "pair-programming" partners. Instead of letting AI write all the code, I kept myself "in-the-loop" to guide and review everything. I made all the final decisions about architecture, debugging, and code testing myself.
+
+### 1. Cursor (IDE Companion)
+* **Use Case**: Understanding test code structure and setting up basic tests.
+* **Why**: It is very helpful for explaining code snippets quickly and generating template code.
+* **Action**: I used it to write the initial template for my tests in [tests.py](file:///Users/mokshdesai/Desktop/interview/final/car-dealership-inventory-system/backend/car_dealership_inventory/app/tests.py). After that, I manually edited the tests to check all edge cases, user roles, and database status confirmations.
+
+### 2. Antigravity (Agentic Assistant)
+* **Use Case**: Take help in Writing the frontend code 
+* **Why**: Sometimes, changes need to be made across multiple files (like styling components and linking pages). An agentic tool can read the whole codebase and make these changes accurately.
+* **Action**: I used it to help build the React frontend layout, making sure the UI screens matched the design colors and connected correctly to the Django backend APIs.
+
+### 3. General GenAI (e.g., ChatGPT)
+* **Use Case**: Planning documentation and writing guides.
+* **Why**: Writing explanations and structuring lists does not require reading my project files.
+* **Action**: I used it to brainstorm ideas on how to organize the README guides, checkpoints, and user instructions.
