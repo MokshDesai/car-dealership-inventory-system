@@ -1,4 +1,4 @@
-// Simple helper to call our Django API
+// Simple helper to call Django API
 
 const API = '/api'
 
