@@ -47,14 +47,11 @@ A high-fidelity, production-ready **Car Dealership Inventory System** built usin
 ---
 
 ### 👑 Administrative Console (Admin Role)
-![Admin Dashboard Grid](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.25.28 PM.png>)
+![Admin Dashboard Grid](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.27.29 PM.png>)
 *Figure 2: 3-Column Admin Dashboard. Integrates active fleet lists under INR (₹) formatting with full editing, deleting, and restocking triggers.*
 
-![Admin Edit Mode Focus](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.31.55 PM.png>)
-*Figure 3: Interactive edit console view. Clicking a card's "Edit" command loads parameters into the right panel and focuses styling variables.*
-
 ![Update Confirmation Popup](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.31.43 PM.png>)
-*Figure 4: Instant validation pop-up confirmation screen highlighting a successful asset record update.*
+*Figure 4: Instant validation pop-up confirmation screen highlighting a successful asset record Opreations(update,purchase,restock,delete).*
 
 ---
 
@@ -62,9 +59,8 @@ A high-fidelity, production-ready **Car Dealership Inventory System** built usin
 ![Customer Dashboard Grid](<docs/screenshots/User/Screenshot 2026-07-12 at 4.33.51 PM.png>)
 *Figure 5: User Dashboard View. Hides admin privileges, showing only customer-focused catalog buttons and the listing acquisition policy rules.*
 
-![Purchase Validation Popup](<docs/screenshots/User/Screenshot 2026-07-12 at 4.34.16 PM.png>)
-*Figure 6: Dynamic customer pop-up modal confirming successful transaction logging.*
-
+ [!NOTE]
+ Additional screenshots illustrating more system features and workflows are available in the [docs](file:///Users/mokshdesai/Desktop/interview/final/car-dealership-inventory-system/docs) folder.
 ---
 
 ## 🛠️ Technology Stack
