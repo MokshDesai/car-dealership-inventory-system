@@ -41,23 +41,29 @@ A high-fidelity, production-ready **Car Dealership Inventory System** built usin
 ## 🖼️ Application Screenshots
 
 ### 🔑 Authentication View
-![Login & Registration Screen](docs/screenshots/login_screen.png)
-*Figure 1: Minimalist split-screen Login page showing transparent form inputs on the left and dynamic brand suite tags on the right.*
+![Login & Registration Screen](<docs/screenshots/Login_Register/Screenshot 2026-07-12 at 4.16.58 PM.png>)
+*Figure 1: Minimalist split-screen authentication page. Left side renders the transparent input panel, while the right displays the dynamic dealer branding suite.*
 
 ---
 
-### 👑 Administrator Console
-![Administrator Dashboard Grid](docs/screenshots/admin_dashboard.png)
-*Figure 2: Full-screen 3-column Admin dashboard layout showing active listing grids (Creta & Verna) using Indian Rupee (₹) currency formatting, alongside the operational forms on the sidebars.*
+### 👑 Administrative Console (Admin Role)
+![Admin Dashboard Grid](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.25.28 PM.png>)
+*Figure 2: 3-Column Admin Dashboard. Integrates active fleet lists under INR (₹) formatting with full editing, deleting, and restocking triggers.*
+
+![Admin Edit Mode Focus](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.31.55 PM.png>)
+*Figure 3: Interactive edit console view. Clicking a card's "Edit" command loads parameters into the right panel and focuses styling variables.*
+
+![Update Confirmation Popup](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.31.43 PM.png>)
+*Figure 4: Instant validation pop-up confirmation screen highlighting a successful asset record update.*
 
 ---
 
-### 💬 Action Validation Pop-ups
-![Login Authorization Confirmation](docs/screenshots/login_success_modal.png)
-*Figure 3: Pop-up overlay modal confirmation dialog displaying a successful login validation check.*
+### 👤 Customer Portal (User Role)
+![Customer Dashboard Grid](<docs/screenshots/User/Screenshot 2026-07-12 at 4.33.51 PM.png>)
+*Figure 5: User Dashboard View. Hides admin privileges, showing only customer-focused catalog buttons and the listing acquisition policy rules.*
 
-![Add Inventory Confirmation](docs/screenshots/add_success_modal.png)
-*Figure 4: Dynamic pop-up modal showing successful inventory record insertion.*
+![Purchase Validation Popup](<docs/screenshots/User/Screenshot 2026-07-12 at 4.34.16 PM.png>)
+*Figure 6: Dynamic customer pop-up modal confirming successful transaction logging.*
 
 ---
 
