@@ -50,7 +50,7 @@ A high-fidelity, production-ready **Car Dealership Inventory System** built usin
 ![Admin Dashboard Grid](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.27.29 PM.png>)
 *Figure 2: 3-Column Admin Dashboard. Integrates active fleet lists under INR (₹) formatting with full editing, deleting, and restocking triggers.*
 
-![Update Confirmation Popup](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.31.43 PM.png>)
+![Update Confirmation Popup](<docs/screenshots/Admin/Screenshot 2026-07-12 at 4.25.28 PM.png>)
 *Figure 4: Instant validation pop-up confirmation screen highlighting a successful asset record Opreations(update,purchase,restock,delete).*
 
 ---
